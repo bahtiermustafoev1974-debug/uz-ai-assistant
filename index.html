@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UZ AI</title>
+
+<style>
+*{box-sizing:border-box}
+
+:root{
+  --bg:#070b14;
+  --side:#0b101b;
+  --card:#111827;
+  --card2:#172033;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --border:rgba(255,255,255,.08);
+  --blue:#2563eb;
+}
+
+body.light{
+  --bg:#eef4fb;
+  --side:#fff;
+  --card:#fff;
+  --card2:#f1f5f9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,.1);
+}
+
+body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 10% 10%,rgba(37,99,235,.25),transparent 30%),
+    radial-gradient(circle at 90% 90%,rgba(6,182,212,.15),transparent 30%),
+    var(--bg);
+  transition:.3s;
+}
+
+button,input{font-family:inherit}
+
+.app{
+  width:100%;
+  height:100vh;
+  display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  width:270px;
+  flex-shrink:0;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  background:var(--side);
+  border-right:1px solid var(--border);
+}
+
+.logo{
+  width:46px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  font-size:23px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 8px 30px rgba(37,99,235,.3);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.brand-text{
+  margin-left:11px;
+}
+
+.brand-title{
+  font-size:19px;
+  font-weight:bold;
+}
+
+.brand-sub{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+.new-chat{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card2);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:bold;
+  transition:.2s;
+}
+
+.new-chat:hover{
+  background:var(--blue);
+  color:white;
+}
+
+.search{
+  margin-top:12px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  outline:none;
+  background:var(--card);
+  color:var(--text);
+}
+
+.history-title{
+  margin:20px 5px 8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:bold;
+}
+
+#history{
+  flex:1;
+  overflow-y:auto;
+}
+
+.history-item{
+  display:flex;
+  align-items:center;
+  padding:10px;
+  margin-bottom:4px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.history-item:hover,
+.history-item.active{
+  background:var(--card2);
+}
+
+.history-name{
+  flex:1;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:13px;
+}
+
+.delete-chat{
+  opacity:0;
+  border:0;
+  background:transparent;
+  color:#ef4444;
+  cursor:pointer;
+}
+
+.history-item:hover .delete-chat{
+  opacity:1;
+}
+
+.side-buttons{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+}
+
+.side-btn{
+  flex:1;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--card2);
+  color:var(--text);
+  cursor:pointer;
+}
+
+/* MAIN */
+
+.main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  height:70px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  padding:0 22px;
+  background:rgba(17,24,39,.75);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(15px);
+}
+
+body.light .header{
+  background:rgba(255,255,255,.75);
+}
+
+.mobile-menu{
+  display:none;
+  border:0;
+  background:none;
+  color:var(--text);
+  font-size:22px;
+  margin-right:12px;
+}
+
+.header-title{
+  font-weight:bold;
+  font-size:17px;
+}
+
+.online{
+  color:#22c55e;
+  font-size:11px;
+  margin-top:3px;
+}
+
+.header-right{
+  margin-left:auto;
+  display:flex;
+  gap:8px;
+}
+
+.icon-btn{
+  width:40px;
+  height:40px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--card2);
+  color:var(--text);
+  cursor:pointer;
+}
+
+/* CHAT */
+
+#chat{
+  flex:1;
+  overflow-y:auto;
+  padding:28px 7%;
+}
+
+.message{
+  max-width:850px;
+  margin:20px auto;
+  display:flex;
+  gap:12px;
+  animation:appear .25s ease;
+}
+
+@keyframes appear{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.avatar{
+  width:38px;
+  height:38px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:var(--card2);
+}
+
+.message.user{
+  flex-direction:row-reverse;
+}
+
+.message.user .message-content{
+  text-align:right;
+}
+
+.message-content{
+  flex:1;
+  min-width:0;
+}
+
+.message-name{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+.message-text{
+  line-height:1.65;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.message.user .message-text{
+  display:inline-block;
+  padding:11px 15px;
+  border-radius:16px 16px 4px 16px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  text-align:left;
+}
+
+/* CODE */
+
+.code-box{
+  margin-top:10px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#020617;
+}
+
+.code-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 11px;
+  background:#0f172a;
+  color:#94a3b8;
+  font-size:11px;
+}
+
+.code-copy{
+  border:0;
+  border-radius:6px;
+  padding:5px 8px;
+  background:#1e293b;
+  color:white;
+  cursor:pointer;
+}
+
+.code-content{
+  padding:14px;
+  overflow-x:auto;
+  color:#e2e8f0;
+  font-family:Consolas,monospace;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre;
+}
+
+/* TYPING */
+
+.typing{
+  display:flex;
+  gap:5px;
+  padding:8px 0;
+}
+
+.typing span{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--muted);
+  animation:bounce 1.2s infinite;
+}
+
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+
+@keyframes bounce{
+  0%,60%,100%{transform:translateY(0);opacity:.4}
+  30%{transform:translateY(-5px);opacity:1}
+}
+
+/* INPUT */
+
+.input-wrapper{
+  padding:10px 7% 18px;
+}
+
+.input-area{
+  max-width:850px;
+  margin:auto;
+  display:flex;
+  gap:8px;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:17px;
+  background:var(--card);
+  box-shadow:0 10px 40px rgba(0,0,0,.15);
+}
+
+#input{
+  flex:1;
+  min-width:0;
+  padding:14px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  font-size:15px;
+}
+
+#send{
+  width:48px;
+  height:48px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  color:white;
+  font-size:19px;
+  cursor:pointer;
+}
+
+.hint{
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:7px;
+}
+
+/* MOBILE */
+
+@media(max-width:750px){
+
+  .sidebar{
+    position:fixed;
+    z-index:100;
+    left:-280px;
+    top:0;
+    height:100%;
+    transition:.25s;
+    box-shadow:10px 0 40px rgba(0,0,0,.3);
+  }
+
+  .sidebar.open{
+    left:0;
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  #chat{
+    padding:20px 14px;
+  }
+
+  .message{
+    max-width:100%;
+  }
+
+  .input-wrapper{
+    padding:10px 12px 14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+      <div class="logo">🤖</div>
+
+      <div class="brand-text">
+        <div class="brand-title">UZ AI</div>
+        <div class="brand-sub">Aqlli yordamchingiz</div>
+      </div>
+    </div>
+
+    <button class="new-chat" id="newChat">
+      ＋ Yangi chat
+    </button>
+
+    <div class="search">
+      <input
+        id="searchInput"
+        placeholder="🔍 Chatlarni qidirish..."
+      >
+    </div>
+
+    <div class="history-title">
+      CHAT TARIXI
+    </div>
+
+    <div id="history"></div>
+
+    <div class="side-buttons">
+
+      <button class="side-btn" id="themeBtn">
+        ☀️
+      </button>
+
+      <button class="side-btn" id="clearAll">
+        🗑️
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="header">
+
+      <button class="mobile-menu" id="mobileMenu">
+        ☰
+      </button>
+
+      <div>
+        <div class="header-title">
+          UZ AI
+        </div>
+
+        <div class="online">
+          ● Online
+        </div>
+      </div>
+
+      <div class="header-right">
+
+        <button class="icon-btn" id="newChatTop">
+          ＋
+        </button>
+
+        <button class="icon-btn" id="themeTop">
+          ☀️
+        </button>
+
+      </div>
+
+    </header>
+
+    <div id="chat"></div>
+
+    <div class="input-wrapper">
+
+      <div class="input-area">
+
+        <input
+          id="input"
+          type="text"
+          placeholder="UZ AI ga savolingizni yozing..."
+          autocomplete="off"
+        >
+
+        <button id="send">
+          ➤
+        </button>
+
+      </div>
+
+      <div class="hint">
+        Enter — yuborish • Shift + Enter — yangi qator
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
