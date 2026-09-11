@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>UZ AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #17191c;
+      --muted: #70757d;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --user: #2563eb;
+      --ai: #ffffff;
+      --input: #ffffff;
+      --shadow: 0 10px 35px rgba(0, 0, 0, 0.07);
+    }
+
+    body.dark {
+      --bg: #101114;
+      --panel: #181a1f;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #292d35;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --user: #2563eb;
+      --ai: #1b1e24;
+      --input: #181a1f;
+      --shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================
+       APP
+    ========================= */
+
+    .app {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      width: 270px;
+      height: 100%;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .sidebar-top {
+      padding: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .brand-text {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .new-chat {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    .new-chat:hover {
+      background: var(--primary-hover);
+    }
+
+    .search-box {
+      margin-top: 12px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .history-title {
+      padding: 0 18px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 10px;
+    }
+
+    .history-item {
+      padding: 11px 12px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .history-item:hover,
+    .history-item.active {
+      background: var(--bg);
+    }
+
+    .sidebar-bottom {
+      padding: 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .sidebar-bottom button {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px;
+      font-size: 13px;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 64px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 20px;
+    }
+
+    .top-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .status {
+      color: #22c55e;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .theme-btn {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    /* =========================
+       CHAT
+    ========================= */
+
+    .chat {
+      flex: 1;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .chat-inner {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 35px 20px 150px;
+    }
+
+    /* =========================
+       WELCOME
+    ========================= */
+
+    .welcome {
+      min-height: calc(100vh - 250px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .welcome-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 23px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .welcome h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .welcome p {
+      max-width: 560px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .quick-actions {
+      width: 100%;
+      max-width: 650px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .quick {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 13px;
+      text-align: left;
+      transition: 0.2s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .quick:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    /* =========================
+       MESSAGE
+    ========================= */
+
+    .message {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      align-items: flex-start;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    .message.user .avatar {
+      background: #111827;
+    }
+
+    .message > div:nth-child(2) {
+      max-width: 78%;
+    }
+
+    .bubble {
+      padding: 13px 15px;
+      border-radius: 15px;
+      background: var(--ai);
+      border: 1px solid var(--border);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .message.user .bubble {
+      background: var(--user);
+      color: white;
+      border-color: transparent;
+    }
+
+    .message-tools {
+      display: flex;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .tool {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 7px;
+      border-radius: 7px;
+    }
+
+    .tool:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* =========================
+       TYPING
+    ========================= */
+
+    .typing {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 3px 2px;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: typing 1.2s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+
+      30% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+
+    /* =========================
+       COMPOSER
+    ========================= */
+
+    .composer-wrap {
+      position: absolute;
+      left: 270px;
+      right: 0;
+      bottom: 0;
+      padding: 15px 20px 20px;
+      background: linear-gradient(
+        to top,
+        var(--bg) 70%,
+        transparent
+      );
+    }
+
+    .composer {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: var(--input);
+      box-shadow: var(--shadow);
+    }
+
+    .composer textarea {
+      flex: 1;
+      min-height: 42px;
+      max-height: 150px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      padding: 11px 10px;
+      background: transparent;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .send-btn {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: 0.2s;
+    }
+
+    .send-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .composer-info {
+      max-width: 900px;
+      margin: 7px auto 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        transition: left 0.25s ease;
+        box-shadow: var(--shadow);
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .composer-wrap {
+        left: 0;
+        padding: 10px 10px 12px;
+      }
+
+      .topbar {
+        padding: 0 12px;
+      }
+
+      .chat-inner {
+        padding: 20px 12px 135px;
+      }
+
+      .welcome {
+        min-height: calc(100vh - 190px);
+        padding: 10px;
+      }
+
+      .welcome h1 {
+        font-size: 25px;
+      }
+
+      .welcome p {
+        font-size: 14px;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .message > div:nth-child(2) {
+        max-width: 85%;
+      }
+
+      .bubble {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .brand-text {
+        font-size: 17px;
+      }
+
+      .top-title {
+        font-size: 15px;
+      }
+
+      .welcome-logo {
+        width: 62px;
+        height: 62px;
+        font-size: 32px;
+      }
+
+      .welcome h1 {
+        font-size: 23px;
+      }
+
+      .quick {
+        padding: 12px;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-top">
+
+        <div class="brand">
+          <div class="brand-logo">U</div>
+          <div class="brand-text">UZ AI</div>
+        </div>
+
+        <button
+          class="new-chat"
+          id="newChat"
+          type="button"
+        >
+          ＋ Yangi chat
+        </button>
+
+        <div class="search-box">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Chatlarni qidirish..."
+            autocomplete="off"
+          >
+        </div>
+
+      </div>
+
+      <div class="history-title">
+        Chatlar
+      </div>
+
+      <div
+        class="history"
+        id="history"
+      ></div>
+
+      <div class="sidebar-bottom">
+
+        <button
+          id="clearBtn"
+          type="button"
+        >
+          🗑 Tozalash
+        </button>
+
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <button
+            class="menu-btn"
+            id="menuBtn"
+            type="button"
+            aria-label="Menyu"
+          >
+            ☰
+          </button>
+
+          <div>
+            <div class="top-title">
+              UZ AI
+            </div>
+
+            <div class="status">
+              ● Online
+            </div>
+          </div>
+
+        </div>
+
+        <button
+          class="theme-btn"
+          id="themeBtn"
+          type="button"
+          aria-label="Tema"
+        >
+          🌙
+        </button>
+
+      </header>
+
+      <!-- CHAT -->
+      <section
+        class="chat"
+        id="chat"
+      >
+
+        <div
+          class="chat-inner"
+          id="chatInner"
+        ></div>
+
+      </section>
+
+      <!-- COMPOSER -->
+      <div class="composer-wrap">
+
+        <div class="composer">
+
+          <textarea
+            id="messageInput"
+            rows="1"
+            placeholder="UZ AI ga xabar yozing..."
+            autocomplete="off"
+          ></textarea>
+
+          <button
+            class="send-btn"
+            id="sendBtn"
+            type="button"
+            aria-label="Yuborish"
+          >
+            ➤
+          </button>
+
+        </div>
+
+        <div class="composer-info">
+          Enter — yuborish • Shift + Enter — yangi qator
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ENG MUHIMI: app.js shu yerda ulanadi -->
+  <script src="./app.js"></script>
+
+</body>
+</html>
