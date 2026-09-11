@@ -69,7 +69,7 @@ app.post("/api/chat", async (req, res) => {
     const interaction = await ai.interactions.create({
       model: "gemini-3.6-flash",
       input: message,
-      system_instruction: SYSTEM_INSTRUCTION
+      system_instruction: systemInstruction
     });
 
     const answer =
@@ -98,6 +98,6 @@ app.listen(PORT, () => {
   console.log("");
   console.log("================================");
   console.log("🚀 UZ AI SERVER ISHLAYAPTI");
-  console.log("🌐 http://localhost:${PORT}");
+  console.log(`🌐 http://localhost:${PORT}`);
   console.log("================================");
 })
